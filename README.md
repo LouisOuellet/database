@@ -1,38 +1,18 @@
 # Database Class
 
+I found this class on https://codeshack.io/super-fast-php-mysql-database-class/. David Adams did a really good job with this class. Besides adding the fetchObject method, this class is all his work.
+
 ## Author
 
 David Adams - https://codeshack.io/super-fast-php-mysql-database-class/
-
-This software provide licensing services for applications. The licensing service performs 3 checks. When you create your application in LSP, it will generate an application token which will need to be stored within your application as a hash. Once your application is created, you can start generating licenses. License authentication works as followed. Your application will send a cURL request to the LSP server with the included license and a fingerprint of the application. The LSP server will then try to identify it this license exist in its database and only reply when one is found and validated. Then it will verify the application fingerprint against the activation fingerprint. If all is successful it will reply with the Application Token. Which you can then be tested locally in the application to validate the LSP server as a 3rd check.
+Louis Ouellet - (the fetchObject method)
 
 ## Change Log
- * [2020-08-14] - Added support for Git clone using ssh.
- * [2020-08-14] - Added a MySQL Database Structure backup method to LSP.
- * [2020-08-14] - Added a MySQL Database Structure import method to LSP.
- * [2020-08-14] - Added a button "Clone" in the app page to get the repository.
- * [2020-08-14] - Improved fingerprint.
- * [2020-08-14] - Updated the welcome page.
- * [2020-08-13] - Added .htaccess files to the users & apps directories to prevent unauthorized access.
- * [2020-08-13] - Added a login system.
- * [2020-08-13] - Added verification for the existence of both apps and users directories. If missing, the system will create them.
- * [2020-08-13] - Added users CRUD.
- * [2020-08-13] - Now creates and initializes a Git repository within the apps folder during creation of an application.
- * [2020-08-13] - Added some fields to the keys. (status,owner,active,fingerprint)
- * [2020-08-13] - The validation process now validates a fingerprint taken from the application
- * [2020-08-13] - An activation process has been added
+ * [2020-08-16] - Uploaded to GitHub
 
-## Requirements for the LSP Server
- * Apache2 => Configured to use the git user
+## Requirements for the Database Class
  * PHP
- 	 * Allow shell_exec module
- * Git-Core
-
-## Requirements for the LSP Class
- * PHP (Important)
- 	 * Allow shell_exec module (Optional)(for the updates features)
- * Git-Core (Optional)(for the updates features)
- * MySQL (Optional)(for the updates features and if your application uses MySQL)
+ * MySQL
 
 ## Testing environment
 ### Hardware
@@ -47,75 +27,47 @@ This software provide licensing services for applications. The licensing service
  * MySQL Ver 15.1 Distrib 10.1.39-MariaDB
 
 ## Usage
-### Licensing
-#### Basics
+### Basics
 ```php
-require_once('lsp.php');
-$lsp = new LSP($LSP_server,$LSP_app,$LSP_license,$LSP_token);
+require_once('database.php');
+$lsp = new Database('host','username','password','database');
 ```
 
-#### Example
+### Example
 ```php
-// We need to include the LSP Class
-require_once('lsp.php');
+// We need to include the Database Class
+require_once('database.php');
 
-// Checks are done by verifying if the server replied and validating it's reply against the hash.
-$lsp = new LSP('host','application','key','token');
+// Connect to MySQL database:
+$db = new Database('host','username','password','database');
 
-// In this case a variable $lsp->Status will be used to
-// display the application or display an activation form instead.
-if($lsp->Status){
-	// You can start your application now
-	echo 'Start Application';
-} else {
-	echo 'Show Activation Form';
+// Fetch a record from a database:
+$account = $db->query('SELECT * FROM accounts WHERE username = ? AND password = ?', 'test', 'test')->fetchArray();
+echo $account['name'];
+
+// Fetch multiple records from a database:
+$accounts = $db->query('SELECT * FROM accounts')->fetchAll();
+
+foreach ($accounts as $account) {
+	echo $account['name'] . '<br>';
 }
 
-exit;
-```
-### Update Service
-#### Basics
-LSP creates a repository for each application that can be use to store your application. Thus if you choose to do this, you can access the repository like so.
+// Get the number of rows:
+$accounts = $db->query('SELECT * FROM accounts');
+echo $accounts->numRows();
 
-```bash
-git clone git@[host]:[local directory]/git/[App Name].git
-```
+// Get the affected number of rows:
+$insert = $db->query('INSERT INTO accounts (username,password,email,name) VALUES (?,?,?,?)', 'test', 'test', 'test@gmail.com', 'Test');
+echo $insert->affectedRows();
 
-This setup will allow you to use git to provide updates to your application. Git is really useful to update the local files since you can preset directory or files that should be ignored using a .gitignore file in your repository. But what do we do for a mysql database. LSP comes with a method that allow us to compare a json file with your database structure and alter your database to match the json file. You can create the JSON file like this. Bare in mind that LSP will still require a valide license to create the file.
+// Get the total number of queries:
+echo $db->query_count;
 
-```php
-// We need to include the LSP Class
-require_once('lsp.php');
-// Checks are done by verifying if the server replied and validating it's reply against the hash.
-$lsp = new LSP('host','application','key','token');
-// We configure our database access
-$lsp->configdb('host', 'username', 'password', 'example');
-// We backup the database structure in a JSON file
-$lsp->create('db.json');
-```
+// Get the last insert ID:
+echo $db->lastInsertID();
 
-#### Example
-```php
-// We need to include the LSP Class
-require_once('lsp.php');
-
-// Checks are done by verifying if the server replied and validating it's reply against the hash.
-$lsp = new LSP('host','application','key','token');
-
-// In this case a variable $lsp->Update will be used to
-// display the start the update or report no update.
-if($lsp->Update){
-	// You can start your application now
-	echo 'Start Updating';
-	// We configure our database access
-	$lsp->configdb('host', 'username', 'password', 'example');
-	// We update the local files
-	$lsp->update();
-	// We start updating our database
-	$lsp->updatedb('db.json');
-} else {
-	echo 'No update available';
-}
+// Close the database:
+$db->close();
 
 exit;
 ```

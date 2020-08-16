@@ -4,6 +4,7 @@ class Database{
 	protected $query;
   protected $show_errors = TRUE;
   protected $query_closed = TRUE;
+	public $query_count = 0;
 
 	public function __construct($dbhost = 'localhost', $dbuser = 'root', $dbpass = '', $dbname = '', $charset = 'utf8') {
 		$this->connection = new mysqli($dbhost, $dbuser, $dbpass, $dbname);
@@ -41,11 +42,13 @@ class Database{
 				$this->error('Unable to process MySQL query (check your params) - ' . $this->query->error);
      	}
       $this->query_closed = FALSE;
+			$this->query_count++;
     } else {
       $this->error('Unable to prepare MySQL statement (check your syntax) - ' . $this->connection->error);
   	}
 		return $this;
   }
+
   public function fetchAll($callback = null) {
     $params = array();
     $row = array();
@@ -71,6 +74,7 @@ class Database{
     $this->query_closed = TRUE;
 		return $result;
 	}
+
   public function fetchArray() {
     $params = array();
     $row = array();
@@ -89,6 +93,14 @@ class Database{
     $this->query_closed = TRUE;
 		return $result;
 	}
+
+	public function fetchObject(){
+    $results = $this->query->get_result()->fetch_object();
+    $this->query->close();
+    $this->query_closed = TRUE;
+		return $results;
+  }
+
 	public function close() {
 		return $this->connection->close();
 	}
