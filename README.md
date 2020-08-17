@@ -98,7 +98,7 @@ $account = [
 $db->update('accounts', $account, 1);
 
 // Delete record for row 1 but you can also specify the search parameter by setting a 3th parameter as the column:
-$db->save('accounts', 1);
+$db->delete('accounts', 1);
 
 exit;
 ```
