@@ -8,6 +8,8 @@ David Adams - https://codeshack.io/super-fast-php-mysql-database-class/
 Louis Ouellet - (the fetchObject method)
 
 ## Change Log
+ * [2020-08-17] - Adding CRUD Methods
+ * [2020-08-17] - Adding getHeaders Method
  * [2020-08-16] - Uploaded to GitHub
 
 ## Requirements for the Database Class
