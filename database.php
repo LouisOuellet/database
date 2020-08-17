@@ -148,13 +148,14 @@ class Database{
     return $results;
   }
 
-  public function get($table, $id = null, $field = 'id'){
-    if($id != null){
-      $results = $this->query('SELECT * FROM `'.$table.'` WHERE `'.$field.'` = ?'.' ORDER BY `id` DESC'.' LIMIT '.$this->Limit,$id);
-    } else {
-      $results = $this->query('SELECT * FROM `'.$table.'` ORDER BY `id` DESC'.' LIMIT '.$this->Limit);
-    }
-    return $results;
+  public function setModified($table, $id){
+    $this->query('UPDATE `'.$table.'` SET
+      modified = ?
+      WHERE
+      id = ?',
+      date("Y-m-d H:i:s"),
+      $id
+    );
   }
 
   public function create($table,$fields){
@@ -164,7 +165,16 @@ class Database{
     return $id;
   }
 
-  public function save($table, $fields, $id, $field = 'id'){
+  public function read($table, $id = null, $field = 'id'){
+    if($id != null){
+      $results = $this->query('SELECT * FROM `'.$table.'` WHERE `'.$field.'` = ?'.' ORDER BY `id` DESC'.' LIMIT '.$this->Limit,$id);
+    } else {
+      $results = $this->query('SELECT * FROM `'.$table.'` ORDER BY `id` DESC'.' LIMIT '.$this->Limit);
+    }
+    return $results;
+  }
+
+  public function update($table, $fields, $id, $field = 'id'){
     $headers = $this->getHeaders($table);
     foreach($fields as $key => $val){
       if((in_array($key,$headers))&&($key != 'id')){
@@ -172,16 +182,6 @@ class Database{
       }
     }
     $this->setModified($id,$table);
-  }
-
-  public function setModified($table, $id){
-    $this->query('UPDATE `'.$table.'` SET
-      modified = ?
-      WHERE
-      id = ?',
-      date("Y-m-d H:i:s"),
-      $id
-    );
   }
 
   public function delete($table,$id,$field = 'id'){
