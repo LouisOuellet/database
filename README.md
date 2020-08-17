@@ -78,9 +78,6 @@ $db->close();
 // Get table headers:
 $db->getHeaders('accounts');
 
-// Get record:
-$db->get('accounts', 'test', 'username');
-
 // Create record:
 $account = [
 	'username' => 'test',
@@ -89,13 +86,16 @@ $account = [
 ];
 $db->create('accounts', $account);
 
-// Save record for row 1 but you can also specify the search parameter by setting a 4th parameter as the column:
+// Read record:
+$db->read('accounts', 'test', 'username');
+
+// Update record for row 1 but you can also specify the search parameter by setting a 4th parameter as the column:
 $account = [
 	'username' => 'test',
 	'password' => 'test',
 	'name' => 'test',
 ];
-$db->save('accounts', $account, 1);
+$db->update('accounts', $account, 1);
 
 // Delete record for row 1 but you can also specify the search parameter by setting a 3th parameter as the column:
 $db->save('accounts', 1);
