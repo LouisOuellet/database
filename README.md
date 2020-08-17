@@ -30,7 +30,7 @@ Louis Ouellet - (the fetchObject method)
 ### Basics
 ```php
 require_once('database.php');
-$lsp = new Database('host','username','password','database');
+$db = new Database('host','username','password','database');
 ```
 
 ### Example
