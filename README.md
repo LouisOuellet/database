@@ -1,6 +1,6 @@
 # Database Class
 
-I found this class on https://codeshack.io/super-fast-php-mysql-database-class/. David Adams did a really good job with this class. Besides adding the fetchObject method, this class is all his work.
+I found this class on https://codeshack.io/super-fast-php-mysql-database-class/. David Adams did a really good job with this class. Besides adding the fetchObject, getHeaders, get, create, save, setModified and delete methods, this class is all his work. The additional methods are there to simplify SQL Requests while also offering an entry for permissions.
 
 ## Author
 
@@ -45,6 +45,10 @@ $db = new Database('host','username','password','database');
 $account = $db->query('SELECT * FROM accounts WHERE username = ? AND password = ?', 'test', 'test')->fetchArray();
 echo $account['name'];
 
+// Fetch a record from a database as objects:
+$account = $db->query('SELECT * FROM accounts WHERE username = ? AND password = ?', 'test', 'test')->fetchObject();
+echo $account->name;
+
 // Fetch multiple records from a database:
 $accounts = $db->query('SELECT * FROM accounts')->fetchAll();
 
@@ -68,6 +72,31 @@ echo $db->lastInsertID();
 
 // Close the database:
 $db->close();
+
+// Get table headers:
+$db->getHeaders('accounts');
+
+// Get record:
+$db->get('accounts', 'test', 'username');
+
+// Create record:
+$account = [
+	'username' => 'test',
+	'password' => 'test',
+	'name' => 'test',
+];
+$db->create('accounts', $account);
+
+// Save record for row 1 but you can also specify the search parameter by setting a 4th parameter as the column:
+$account = [
+	'username' => 'test',
+	'password' => 'test',
+	'name' => 'test',
+];
+$db->save('accounts', $account, 1);
+
+// Delete record for row 1 but you can also specify the search parameter by setting a 3th parameter as the column:
+$db->save('accounts', 1);
 
 exit;
 ```

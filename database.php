@@ -5,14 +5,22 @@ class Database{
   protected $show_errors = TRUE;
   protected $query_closed = TRUE;
 	public $query_count = 0;
+	protected $Limit = 500;
+	protected $Database = 500;
 
 	public function __construct($dbhost = 'localhost', $dbuser = 'root', $dbpass = '', $dbname = '', $charset = 'utf8') {
 		$this->connection = new mysqli($dbhost, $dbuser, $dbpass, $dbname);
+		$this->Database = $dbname;
 		if ($this->connection->connect_error) {
 			$this->error('Failed to connect to MySQL - ' . $this->connection->connect_error);
 		}
 		$this->connection->set_charset($charset);
 	}
+
+	public function setLimit($set = 500){
+		$this->Limit = $set;
+	}
+
   public function query($query) {
     if (!$this->query_closed) {
       $this->query->close();
@@ -104,25 +112,82 @@ class Database{
 	public function close() {
 		return $this->connection->close();
 	}
+
   public function numRows() {
 		$this->query->store_result();
 		return $this->query->num_rows;
 	}
+
 	public function affectedRows() {
 		return $this->query->affected_rows;
 	}
+
   public function lastInsertID() {
   	return $this->connection->insert_id;
   }
+
 	public function error($error) {
     if ($this->show_errors) {
       exit($error);
     }
   }
+
 	protected function _gettype($var) {
     if (is_string($var)) return 's';
     if (is_float($var)) return 'd';
     if (is_int($var)) return 'i';
     return 'b';
 	}
+
+  public function getHeaders($table){
+    $headers = $this->query('SELECT * FROM information_schema.COLUMNS WHERE TABLE_NAME = ? AND TABLE_SCHEMA = ?', $table,$this->Database)->fetchAll();
+    $results = [];
+    foreach($headers as $header){
+      array_push($results,$header['COLUMN_NAME']);
+    }
+    return $results;
+  }
+
+  public function get($table, $id = null, $field = 'id'){
+    if($id != null){
+      $results = $this->query('SELECT * FROM `'.$table.'` WHERE `'.$field.'` = ?'.' ORDER BY `id` DESC'.' LIMIT '.$this->Limit,$id);
+    } else {
+      $results = $this->query('SELECT * FROM `'.$table.'` ORDER BY `id` DESC'.' LIMIT '.$this->Limit);
+    }
+    return $results;
+  }
+
+  public function create($table,$fields){
+    $this->query('INSERT INTO `'.$table.'` (created) VALUES (?)', date("Y-m-d H:i:s"));
+    $id = $this->lastInsertID();
+    $this->save($fields, $id, $table);
+    return $id;
+  }
+
+  public function save($table, $fields, $id, $field = 'id'){
+    $headers = $this->getHeaders($table);
+    foreach($fields as $key => $val){
+      if((in_array($key,$headers))&&($key != 'id')){
+        $this->query('UPDATE `'.$table.'` SET `'.$key.'` = ? WHERE `'.$field.'` = ?',$val,$id);
+      }
+    }
+    $this->setModified($id,$table);
+  }
+
+  public function setModified($table, $id){
+    $this->query('UPDATE `'.$table.'` SET
+      modified = ?
+      WHERE
+      id = ?',
+      date("Y-m-d H:i:s"),
+      $id
+    );
+  }
+
+  public function delete($table,$id,$field = 'id'){
+		$query=$this->query('SELECT * FROM `'.$table.'` WHERE `'.$field.'` = ?',$id);
+    if($query->numRows() > 0){
+      $results = $this->query('DELETE FROM `'.$table.'` WHERE `'.$field.'` = ?',$id);
+    }
+  }
 }
