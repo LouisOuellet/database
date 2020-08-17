@@ -1,6 +1,6 @@
 # Database Class
 
-I found this class on https://codeshack.io/super-fast-php-mysql-database-class/. David Adams did a really good job with this class. Besides adding the fetchObject, getHeaders, get, create, save, setModified and delete methods, this class is all his work. The additional methods are there to simplify SQL Requests while also offering an entry for permissions.
+I found this class on https://codeshack.io/super-fast-php-mysql-database-class/. David Adams is the original author of this class. I added the fetchObject, getHeaders, setModified, create, read, update and delete methods. The additional methods are there to simplify SQL Requests while also offering an entry for permissions.
 
 ## Author
 
