@@ -1,12 +1,14 @@
 <?php
+
 class Database{
+
   protected $connection;
 	protected $query;
   protected $show_errors = TRUE;
   protected $query_closed = TRUE;
 	public $query_count = 0;
 	protected $Limit = 500;
-	protected $Database = 500;
+	protected $Database;
 
 	public function __construct($dbhost = 'localhost', $dbuser = 'root', $dbpass = '', $dbname = '', $charset = 'utf8') {
 		$this->connection = new mysqli($dbhost, $dbuser, $dbpass, $dbname);
@@ -159,9 +161,9 @@ class Database{
   }
 
   public function create($table,$fields){
-    $this->query('INSERT INTO `'.$table.'` (created) VALUES (?)', date("Y-m-d H:i:s"));
+    $results = $this->query('INSERT INTO `'.$table.'` (created) VALUES (?)', date("Y-m-d H:i:s"));
     $id = $this->lastInsertID();
-    $this->save($fields, $id, $table);
+    $this->update($table, $fields, $id);
     return $id;
   }
 
@@ -181,13 +183,16 @@ class Database{
         $this->query('UPDATE `'.$table.'` SET `'.$key.'` = ? WHERE `'.$field.'` = ?',$val,$id);
       }
     }
-    $this->setModified($id,$table);
+    $this->setModified($table,$id);
+		$results = $this->query('SELECT * FROM `'.$table.'` WHERE `'.$field.'` = ?'.' ORDER BY `id` DESC'.' LIMIT '.$this->Limit,$id);
+		return $results;
   }
 
   public function delete($table,$id,$field = 'id'){
 		$query=$this->query('SELECT * FROM `'.$table.'` WHERE `'.$field.'` = ?',$id);
     if($query->numRows() > 0){
       $results = $this->query('DELETE FROM `'.$table.'` WHERE `'.$field.'` = ?',$id);
+			return TRUE;
     }
   }
 }
